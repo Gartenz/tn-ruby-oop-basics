@@ -11,18 +11,11 @@ class Station
   def initialize(name)
     @name = name
     @trains = []
-    @current_train = nil
   end
 
   def train_arrive(train)
-    if available?
-      train.stop
-      self.current_train = train
-      self.trains << train
-      self.current_train = nil
-    else
-      puts "Станция занята другим поездом"
-    end
+    train.stop
+    self.trains << train
   end
 
   def train_depart(train)
@@ -38,11 +31,4 @@ class Station
     self.trains.each { |train| types_count[train.type.name] += 1 }
     types_count.each { |type, count| puts "Поездов типа \"#{type}\": #{count}" }
   end
-
-  private
-
-  def available?
-    return self.current_train.nil? ? true : false
-  end
-
 end
