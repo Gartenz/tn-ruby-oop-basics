@@ -19,7 +19,7 @@ class Station
   end
 
   def train_depart(train)
-    trains.delete(train)
+    self.trains.delete(train)
   end
 
   def show_trains

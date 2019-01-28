@@ -13,15 +13,13 @@ class Route
   end
 
   def add_station(station)
-    stations_len = self.stations.size
-    self.stations.insert(stations_len - 1, station)
+    self.stations.insert(-2, station)
   end
 
   def delete_station(station)
     if self.stations.include?(station)
       if station != self.stations.first || station != self.stations.last
-        position = self.stations.index(station)
-        self.stations.delete_at(position)
+        self.stations.delete(station)
       end
     end
   end

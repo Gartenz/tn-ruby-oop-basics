@@ -16,7 +16,7 @@
 class TrainTypes
   attr_reader :name
 
-  def initialize (name)
+  def initialize(name)
     @name = name
   end
 end
@@ -30,17 +30,14 @@ class Train
     @name = name
     @type = type
     @cart_count = cart_count
-    @current_station = nil
-    @next_station = nil
-    @previos_station = nil
   end
 
   def add_cart
-    self.cart_count += 1 if self.speed == 0
+    self.cart_count += 1 if stopped?
   end
 
   def delete_cart
-    self.cart_count -= 1 if self.speed == 0 && cart_count > 0
+    self.cart_count -= 1 if stopped? && cart_count > 0
   end
 
   def stop
@@ -73,6 +70,10 @@ class Train
       self.next_station = self.route.stations[previous_station_index]
     else
       puts "Поезд на первой станции"
+  end
+
+  def stopped?
+    return self.speed == 0
   end
 
 end
