@@ -73,7 +73,7 @@ class Train
   end
 
   def stopped?
-    return self.speed == 0
+    self.speed.zero?
   end
 
 end
