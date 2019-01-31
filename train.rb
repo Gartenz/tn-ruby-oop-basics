@@ -12,32 +12,23 @@
 # + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад, но только на 1 станцию за раз.
 # + Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
 
-
-class TrainTypes
-  attr_reader :name
-
-  def initialize(name)
-    @name = name
-  end
-end
-
 class Train
   attr_accessor :speed
-  attr_reader :cart_count, :type, :current_station, :next_station, :previos_station
+  attr_reader :name, :type, :current_station, :next_station, :previous_station, :wagons
 
-  def initialize(name, type, cart_count)
+  def initialize(name, type)
     @speed = 0
     @name = name
     @type = type
-    @cart_count = cart_count
+    @wagons = []
   end
 
-  def add_cart
-    self.cart_count += 1 if stopped?
+  def add_wagon(wagon)
+    self.wagons << wagon if stopped? && to_hook?(wagon)
   end
 
-  def delete_cart
-    self.cart_count -= 1 if stopped? && cart_count > 0
+  def delete_wagon(wagon)
+    self.wagons.delete(wagon) if stopped? && self.wagons.any? && to_hook?(wagon)
   end
 
   def stop
@@ -52,28 +43,36 @@ class Train
 
   def move_forward
     if self.current_station != self.route.stations.last
-      self.previos_station = @current_station
+      self.previous_station = @current_station
       self.current_station.train_depart(self)
       self.speed += 10
       next_station_index = self.route.index(self.current_station) + 1
       self.next_station = self.route.stations[next_station_index]
     else
       puts "Поезд на последней станции"
+    end
   end
 
   def move_backward
     if self.current_station != self.route.stations.first
-      self.previos_station = @current_station
+      self.previous_station = @current_station
       self.current_station.train_depart(self)
       self.speed += 10
       previous_station_index = self.route.index(self.current_station) - 1
       self.next_station = self.route.stations[previous_station_index]
     else
       puts "Поезд на первой станции"
+    end
   end
 
   def stopped?
     self.speed.zero?
+  end
+
+  private
+
+  def to_hook?(wagon)
+    self.type == wagon.type
   end
 
 end
