@@ -38,7 +38,7 @@ class ControlPanel
       when 2 then station_manage
       when 3 then route_manage
       when 4 then break
-      else "Такого в меню нет!"
+      else puts "Такого в меню нет!"
       end
     end
   end
@@ -47,14 +47,14 @@ class ControlPanel
   
   def train_manage
     loop do
-      puts "1. Cоздать поезд"
+      puts "1.Cоздать поезд"
       if self.trains.any?
-        puts "2. Просмотреть список поездов"
-        puts "3. Назначить маршрут поезду" if routes.any?
-        puts "4. Добавить вагон к поезду"
-        puts "5. Отцепить вагон от поезда"
-        puts "6. Управлять движением поезда"
-        puts "7. Назад"
+        puts "2.Просмотреть список поездов"
+        puts "3.Назначить маршрут поезду" if routes.any?
+        puts "4.Добавить вагон к поезду"
+        puts "5.Отцепить вагон от поезда"
+        puts "6.Управлять движением поезда"
+        puts "7.Назад"
       end
 
       user_choise = gets.chomp.to_i
@@ -66,7 +66,7 @@ class ControlPanel
       when 5 then delete_wagon
       when 6 then train_move
       when 7 then return
-      else "Такого в меню нет!"
+      else puts "Такого в меню нет!"
       end
     end
   end
@@ -75,17 +75,32 @@ class ControlPanel
     puts "Введите название поезда"
     name = gets.chomp
     puts "Введите тип поезда: 1.Пассажирский, 2.Грузовой"
-    type = gets.chomp.to_i
-    train = case type
-      when 1 then PassengerTrain.new(name, :passenger)
-      when 2 then CargoTrain.new(name, :cargo)
+    user_choise = gets.chomp.to_i
+    train = case user_choise
+      when 1 then PassengerTrain.new(name)
+      when 2 then CargoTrain.new(name)
       end
     self.trains << train
   end
 
   def list_trains
-    self.trains.each { |train| puts "\"#{train.name}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}" }
+    self.trains.each_with_index { |train, index| puts "#{index}. \"#{train.name}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}" }
   end
+
+  def add_wagon
+    loop do
+      list_trains
+      puts "К какому поезду хотите добавить вагон?"
+      train_number = gets.chomp.to_i
+      train = self.trains[train_number]
+      puts "Какой вагон вы хотите добавить? 1.Пассажирский, 2.Грузовой"
+      user_choise = gets.chomp.to_i 
+      wagon = case user_choise
+        when 1 then PassengerWagon.new
+      end
+    end
+  end
+
 
 end
 

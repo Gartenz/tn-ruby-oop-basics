@@ -24,11 +24,19 @@ class Train
   end
 
   def add_wagon(wagon)
-    self.wagons << wagon if stopped? && to_hook?(wagon)
+    if stopped? && to_hook?(wagon)
+      self.wagons << wagon
+    else
+      puts "Нельзя добавить вагон."
+    end
   end
 
   def delete_wagon(wagon)
-    self.wagons.delete(wagon) if stopped? && self.wagons.any? && to_hook?(wagon)
+    if stopped? && self.wagons.any? && to_hook?(wagon)
+      self.wagons.delete(wagon)
+    else 
+      puts "Нельзя оцепить вагон."
+    end
   end
 
   def stop
