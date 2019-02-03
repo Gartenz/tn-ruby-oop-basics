@@ -14,9 +14,10 @@
 
 class Train
   attr_accessor :speed
-  attr_reader :name, :type, :current_station, :next_station, :previous_station, :wagons
+  attr_reader :name, :type, :current_station, :next_station,
+   :previous_station, :wagons, :route
 
-  def initialize(name, type)
+  def initialize(name, type = :unknown)
     @speed = 0
     @name = name
     @type = type
@@ -31,9 +32,9 @@ class Train
     end
   end
 
-  def delete_wagon(wagon)
-    if stopped? && self.wagons.any? && to_hook?(wagon)
-      self.wagons.delete(wagon)
+  def delete_wagon(number)
+    if stopped? && self.wagons.any?
+      self.wagons.delete_at(number)
     else 
       puts "Нельзя оцепить вагон."
     end
@@ -44,30 +45,41 @@ class Train
   end
 
   def route=(route)
-    self.route = route
-    self.current_station = route.stations.first
+    @route = route
+    @current_station = route.stations.first
     self.route.stations.first.train_arrive(self)
   end
 
+  def list_wagons
+    puts "Количество вагоно у поезда \"#{self.name}\": #{self.wagons.size}"
+    self.wagons.each_with_index { |wagon,index| puts "#{index}.#{wagon}" }
+  end
+
   def move_forward
+    return unless has_route? 
     if self.current_station != self.route.stations.last
-      self.previous_station = @current_station
+      @previous_station = @current_station
       self.current_station.train_depart(self)
       self.speed += 10
-      next_station_index = self.route.index(self.current_station) + 1
-      self.next_station = self.route.stations[next_station_index]
+      next_station_index = self.route.stations.index(self.current_station) + 1
+      @next_station = self.route.stations[next_station_index]
+      puts "Поезд отправляется на станцию: #{self.next_station.name}"
+      self.next_station.train_arrive(self)
     else
       puts "Поезд на последней станции"
     end
   end
 
   def move_backward
+    return unless has_route?
     if self.current_station != self.route.stations.first
-      self.previous_station = @current_station
+      @previous_station = @current_station
       self.current_station.train_depart(self)
       self.speed += 10
-      previous_station_index = self.route.index(self.current_station) - 1
-      self.next_station = self.route.stations[previous_station_index]
+      next_station_index = self.route.index(self.current_station) - 1
+      @next_station = self.route.stations[next_station_index]
+      puts "Поезд отправляется на станцию: #{self.next_station}"
+      self.next_station.train_arrive(self)
     else
       puts "Поезд на первой станции"
     end
@@ -78,6 +90,10 @@ class Train
   end
 
   private
+
+  def has_route?
+    self.route != nil
+  end
 
   def to_hook?(wagon)
     self.type == wagon.type

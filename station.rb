@@ -6,7 +6,7 @@
 #  + Может отправлять поезда (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции).
 
 class Station
-  attr_reader :name
+  attr_reader :name, :trains
 
   def initialize(name)
     @name = name
@@ -22,11 +22,13 @@ class Station
     self.trains.delete(train)
   end
 
-  def show_trains
-    self.trains.each { |train| puts train.name }
+  def list_trains
+    return if self.trains.nil?
+    self.trains.each { |train| puts "\"#{train.name}\" тип: #{train.type}" }
   end
 
-  def show_trains_by_type
+  def list_trains_by_type
+    return if self.trains.nil?
     types_count = {}
     self.trains.each { |train| types_count[train.type.name] += 1 }
     types_count.each { |type, count| puts "Поездов типа \"#{type}\": #{count}" }

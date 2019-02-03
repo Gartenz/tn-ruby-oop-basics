@@ -9,20 +9,32 @@ class Route
   attr_reader :stations
 
   def initialize(first_station, last_station)
+    @stations = []
     @stations << first_station << last_station
   end
 
   def add_station(station)
+    return if self.stations.include?(station)
     self.stations.insert(-2, station)
+    puts "Станция добавлена."
   end
 
   def delete_station(station)
     return unless self.stations.include?(station)
     return if [self.stations.first, self.stations.last].include?(station)
     self.stations.delete(station)
+    puts "Станция удалена."
   end
 
   def show
-    self.stations.each { |station| puts station.name }
+    route_map = ""
+    self.stations.each { |station| route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}" }
+    puts route_map
+  end
+
+  def to_s
+    route_map = ""
+    self.stations.each { |station| route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}" }
+    route_map
   end
 end
