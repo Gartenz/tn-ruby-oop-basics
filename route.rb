@@ -28,13 +28,17 @@ class Route
 
   def show
     route_map = ""
-    self.stations.each { |station| route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}" }
+    self.stations.each do |station| 
+      route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}"
+    end
     puts route_map
   end
 
   def to_s
     route_map = ""
-    self.stations.each { |station| route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}" }
+    self.stations.each do |station|
+      route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}"
+    end
     route_map
   end
 end

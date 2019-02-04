@@ -23,14 +23,18 @@ class Station
   end
 
   def list_trains
-    return if self.trains.nil?
-    self.trains.each { |train| puts "\"#{train.name}\" тип: #{train.type}" }
+    return unless self.trains
+    list = ""
+    self.trains.each { |train| list += "\"#{train.name}\" тип: #{train.type}" }
+    list
   end
 
   def list_trains_by_type
-    return if self.trains.nil?
+    return unless self.trains
     types_count = {}
     self.trains.each { |train| types_count[train.type.name] += 1 }
-    types_count.each { |type, count| puts "Поездов типа \"#{type}\": #{count}" }
+    list = ""
+    types_count.each { |type, count| list "Поездов типа \"#{type}\": #{count}" }
+    list
   end
 end

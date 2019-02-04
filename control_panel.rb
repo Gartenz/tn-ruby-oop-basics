@@ -195,7 +195,7 @@ class ControlPanel
     if (0...self.stations.count).include?(user_choise)
       station = self.stations[user_choise]
       puts "На станции \"#{station.name}\" находятся:"
-      station.list_trains
+      puts station.list_trains
     else
       puts "Неправильно выбрана станция"
     end
