@@ -11,17 +11,32 @@
 # + При назначении маршрута поезду, поезд автоматически помещается на первую станцию в маршруте.
 # + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад, но только на 1 станцию за раз.
 # + Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
+require_relative 'company'
+require_relative 'instance_counter'
 
 class Train
+  include Company
+  include InstanceCounter
+
   attr_accessor :speed
-  attr_reader :name, :type, :current_station, :next_station,
+  attr_reader :train_number, :type, :current_station, :next_station,
    :previous_station, :wagons, :route
 
-  def initialize(name, type = :unknown)
+  @@trains = []
+
+  def self.find(train_number)
+    @@trains.each { |train| return train if train.train_number.downcase == train_number.downcase }
+    nil
+  end
+
+  def initialize(train_number, company_name, type = :unknown)
     @speed = 0
-    @name = name
+    @train_number = train_number
+    @company_name = company_name
     @type = type
     @wagons = []
+    @@trains << self
+    self.register_instance
   end
 
   def add_wagon(wagon)
@@ -51,7 +66,7 @@ class Train
   end
 
   def list_wagons
-    puts "Количество вагоно у поезда \"#{self.name}\": #{self.wagons.size}"
+    puts "Количество вагоно у поезда \"#{self.train_number}\": #{self.wagons.size}"
     self.wagons.each_with_index { |wagon,index| puts "#{index}.#{wagon}" }
   end
 

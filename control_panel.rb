@@ -73,18 +73,18 @@ class ControlPanel
 
   def create_train
     puts "Введите название поезда"
-    name = gets.chomp
+    train_number = gets.chomp
     puts "Введите тип поезда: 1.Пассажирский, 2.Грузовой"
     user_choise = gets.chomp.to_i
     case user_choise
-      when 1 then self.trains << PassengerTrain.new(name)
-      when 2 then self.trains << CargoTrain.new(name)
+      when 1 then self.trains << PassengerTrain.new(train_number)
+      when 2 then self.trains << CargoTrain.new(train_number)
       else puts "Такого варианта нет!"
     end
   end
 
   def list_trains
-    self.trains.each.with_index(1) { |train, index| puts "#{index}. \"#{train.name}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}" }
+    self.trains.each.with_index(1) { |train, index| puts "#{index}. \"#{train.train_number}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}" }
   end
 
   def add_wagon

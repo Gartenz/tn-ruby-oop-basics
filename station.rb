@@ -4,13 +4,21 @@
 #  + Может возвращать список всех поездов на станции, находящиеся в текущий момент
 #  + Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских
 #  + Может отправлять поезда (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции).
+require_relative 'instance_counter'
 
 class Station
+  include InstaceCounter
+    
   attr_reader :name, :trains
+
+  def self.all
+    @@stations 
+  end
 
   def initialize(name)
     @name = name
     @trains = []
+    @@stations << self
   end
 
   def train_arrive(train)
@@ -25,7 +33,7 @@ class Station
   def list_trains
     return unless self.trains
     list = ""
-    self.trains.each { |train| list += "\"#{train.name}\" тип: #{train.type}" }
+    self.trains.each { |train| list += "\"#{train.train_number}\" тип: #{train.type}" }
     list
   end
 
@@ -37,4 +45,9 @@ class Station
     types_count.each { |type, count| list "Поездов типа \"#{type}\": #{count}" }
     list
   end
+
+  private
+
+  @@stations = []
+
 end
