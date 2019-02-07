@@ -22,11 +22,10 @@ class Train
   attr_reader :train_number, :type, :current_station, :next_station,
    :previous_station, :wagons, :route
 
-  @@trains = []
+  @@trains = {}
 
   def self.find(train_number)
-    @@trains.each { |train| return train if train.train_number.downcase == train_number.downcase }
-    nil
+    @@trains[train_number]
   end
 
   def initialize(train_number, company_name, type = :unknown)
@@ -35,7 +34,7 @@ class Train
     @company_name = company_name
     @type = type
     @wagons = []
-    @@trains << self
+    @@trains[train_number] = self
     self.register_instance
   end
 
