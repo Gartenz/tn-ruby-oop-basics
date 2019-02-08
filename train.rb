@@ -9,7 +9,8 @@
 #     Прицепка/отцепка вагонов может осуществляться только если поезд не движется.
 # + Может принимать маршрут следования (объект класса Route). 
 # + При назначении маршрута поезду, поезд автоматически помещается на первую станцию в маршруте.
-# + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад, но только на 1 станцию за раз.
+# + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад,
+#     но только на 1 станцию за раз.
 # + Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
 require_relative 'company'
 require_relative 'instance_counter'
@@ -18,9 +19,31 @@ class Train
   include Company
   include InstanceCounter
 
+  class NameError < StandardError
+    def message
+      "Непраивльный формат номера поезда. Допустимый формат: "\
+      "три буквы или цифры в любом порядке, необязательный дефис "\
+      "и еще 2 буквы или цифры после дефиса."
+    end
+  end
+
+  class WagonError < StandardError
+    def message
+      "К поезду можно прикрепить вагон того же типа что и позед."
+    end
+  end
+
+  class MovementError < StandardError
+    def message
+      "Поезд находится на первой или последней станции."
+    end
+  end
+
   attr_accessor :speed
   attr_reader :train_number, :type, :current_station, :next_station,
    :previous_station, :wagons, :route
+
+  NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i
 
   @@trains = {}
 
@@ -35,23 +58,17 @@ class Train
     @type = type
     @wagons = []
     @@trains[train_number] = self
+    validate!(train_number, company_name)
     self.register_instance
   end
 
   def add_wagon(wagon)
-    if stopped? && to_hook?(wagon)
-      self.wagons << wagon
-    else
-      puts "Нельзя добавить вагон."
-    end
+    validate_wagon!(wagon)
+    self.wagons << wagon if stopped?
   end
 
   def delete_wagon(number)
-    if stopped? && self.wagons.any?
-      self.wagons.delete_at(number)
-    else 
-      puts "Нельзя оцепить вагон."
-    end
+    self.wagons.delete_at(number) if stopped? && self.wagons.any?
   end
 
   def stop
@@ -64,43 +81,44 @@ class Train
     self.route.stations.first.train_arrive(self)
   end
 
-  def list_wagons
-    puts "Количество вагоно у поезда \"#{self.train_number}\": #{self.wagons.size}"
-    self.wagons.each_with_index { |wagon,index| puts "#{index}.#{wagon}" }
-  end
-
   def move_forward
     return unless has_route? 
-    if self.current_station != self.route.stations.last
-      @previous_station = @current_station
-      self.current_station.train_depart(self)
-      self.speed += 10
-      next_station_index = self.route.stations.index(self.current_station) + 1
-      @next_station = self.route.stations[next_station_index]
-      puts "Поезд отправляется на станцию: #{self.next_station.name}"
-      self.next_station.train_arrive(self)
-    else
-      puts "Поезд на последней станции"
-    end
+    raise MovementError if self.current_station == self.route.stations.last
+    @previous_station = @current_station
+    self.current_station.train_depart(self)
+    self.speed += 10
+    next_station_index = self.route.stations.index(self.current_station) + 1
+    @next_station = self.route.stations[next_station_index]
+    self.next_station.train_arrive(self)
   end
 
   def move_backward
     return unless has_route?
-    if self.current_station != self.route.stations.first
-      @previous_station = @current_station
-      self.current_station.train_depart(self)
-      self.speed += 10
-      next_station_index = self.route.index(self.current_station) - 1
-      @next_station = self.route.stations[next_station_index]
-      puts "Поезд отправляется на станцию: #{self.next_station}"
-      self.next_station.train_arrive(self)
-    else
-      puts "Поезд на первой станции"
-    end
+    raise MovementError if self.current_station == self.route.stations.first
+    @previous_station = @current_station
+    self.current_station.train_depart(self)
+    self.speed += 10
+    next_station_index = self.route.index(self.current_station) - 1
+    @next_station = self.route.stations[next_station_index]
+    self.next_station.train_arrive(self)
   end
 
   def stopped?
     self.speed.zero?
+  end
+
+  def valid?
+    validate!(self.train_number, self.company_name)
+    true
+  rescue NameError,CompanyNameError
+    false
+  end
+
+  protected
+
+  def validate!(train_number, company_name)
+    raise NameError unless train_number =~ NUMBER_FORMAT
+    validate_company_name!(company_name)
   end
 
   private
@@ -109,8 +127,8 @@ class Train
     self.route != nil
   end
 
-  def to_hook?(wagon)
-    self.type == wagon.type
+  def validate_wagon!(wagon)
+    raise WagonError unless self.type == wagon.type
   end
 
 end

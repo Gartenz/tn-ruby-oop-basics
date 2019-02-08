@@ -9,6 +9,18 @@ require_relative 'instance_counter'
 class Route
   include InstanceCounter
   
+  class AddStationError < StandardError
+    def message
+      "Невозможно добавить станцию. Такая станция уже существует в маршруте."
+    end
+  end
+
+  class DeleteStationError < StandardError
+    def message
+      "Невозможно удалить станцию. Эта станция первая/последняя в маршруте."
+    end
+  end
+
   attr_reader :stations
 
   def initialize(first_station, last_station)
@@ -17,26 +29,16 @@ class Route
   end
 
   def add_station(station)
-    return if self.stations.include?(station)
+    raise AddStationError if self.stations.include?(station)
     self.stations.insert(-2, station)
-    puts "Станция добавлена."
   end
 
   def delete_station(station)
     return unless self.stations.include?(station)
-    return if [self.stations.first, self.stations.last].include?(station)
+    raise DeleteStationError if [self.stations.first, self.stations.last].include?(station)
     self.stations.delete(station)
-    puts "Станция удалена."
   end
-
-  def show
-    route_map = ""
-    self.stations.each do |station| 
-      route_map += self.stations.last != station ? "#{station.name} -> " : "#{station.name}"
-    end
-    puts route_map
-  end
-
+  
   def to_s
     route_map = ""
     self.stations.each do |station|

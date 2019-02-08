@@ -8,17 +8,36 @@ require_relative 'instance_counter'
 
 class Station
   include InstanceCounter
-    
+  
+  class NameError < StandardError
+    def message
+      "Неправильный формат стании. Имя станции может содержать только буквы и числа."
+    end
+  end
+
+  class UniquenessError < StandardError
+    def message
+      "Станция с таким именем уже существует."
+    end
+  end
+
   attr_reader :name, :trains
+
+  STATION_NAME_FORMAT = /[а-я\w\d]*/
 
   def self.all
     @@stations 
   end
 
+  def self.find(name)
+    @@stations[name]
+  end
+
   def initialize(name)
+    validate!(name)
     @name = name
     @trains = []
-    @@stations << self
+    @@stations[name] = self
   end
 
   def train_arrive(train)
@@ -46,8 +65,14 @@ class Station
     list
   end
 
+  protected
+
+  def validate!(name)
+    raise NameError unless name =~ STATION_NAME_FORMAT
+    raise UniquenessError if Station.find(name)
+  end 
+
   private
 
-  @@stations = []
-
+  @@stations = {}
 end

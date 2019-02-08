@@ -72,15 +72,23 @@ class ControlPanel
   end
 
   def create_train
-    puts "Введите название поезда"
-    train_number = gets.chomp
-    puts "Введите тип поезда: 1.Пассажирский, 2.Грузовой"
-    user_choise = gets.chomp.to_i
-    case user_choise
-      when 1 then self.trains << PassengerTrain.new(train_number)
-      when 2 then self.trains << CargoTrain.new(train_number)
-      else puts "Такого варианта нет!"
+    begin
+      puts "Введите название поезда:"
+      train_number = gets.chomp
+      puts "Введите название компании:"
+      company_name = gets.chomp
+      puts "Введите тип поезда: 1.Пассажирский, 2.Грузовой"
+      user_choise = gets.chomp.to_i
+      case user_choise
+        when 1 then self.trains << PassengerTrain.new(train_number, company_name)
+        when 2 then self.trains << CargoTrain.new(train_number, company_name)
+        else puts "Такого варианта нет!"
+      end
+    rescue Train::NameError, Train::CompanyNameError => e
+      puts e.message
+      retry
     end
+    puts "Создан поезд с номером: #{train_number} от компании: #{company_name}"
   end
 
   def list_trains
@@ -92,13 +100,20 @@ class ControlPanel
     puts "К какому поезду хотите добавить вагон?"
     train_number = gets.chomp.to_i - 1 
     if (0...self.trains.count).include?(train_number)
-      train = self.trains[train_number] 
-      puts "Какой вагон вы хотите добавить? 1.Пассажирский, 2.Грузовой"
-      user_choise = gets.chomp.to_i 
-      case user_choise
-        when 1 then train.add_wagon(PassengerWagon.new)
-        when 2 then train.add_wagon(CargoWagon.new)
-        else puts "Такого варианта нет!"
+      train = self.trains[train_number]
+      begin 
+        puts "Какой вагон вы хотите добавить? 1.Пассажирский, 2.Грузовой"
+        user_choise = gets.chomp.to_i
+        puts "Введите название компании:"
+        company_name = gets.chomp
+        case user_choise
+          when 1 then train.add_wagon(PassengerWagon.new(company_name))
+          when 2 then train.add_wagon(CargoWagon.new(company_name))
+          else puts "Такого варианта нет!"
+        end
+      rescue Train::WagonError, Wagon::CompanyNameError => e
+        puts e.message
+        retry
       end
     end
   end
@@ -106,9 +121,12 @@ class ControlPanel
   def delete_wagon
     list_trains
     puts "От какого поезда хотите отцепить вагон?"
-    train_number = gets.chomp.to_i
+    train_number = gets.chomp.to_i - 1
     train = self.trains[train_number] if train_number < self.trains.count
-    train.list_wagons
+    
+    puts "Количество вагонов у поезда \"#{train.train_number}\": #{train.wagons.size}"
+    train.wagons.each_with_index { |wagon,index| puts "#{index}.#{wagon.company_name} тип: #{wagon.type}" }
+
     puts "Какой вагон хотите удалить?"
     user_choise = gets.chomp.to_i
     train.delete_wagon(user_choise)
@@ -136,12 +154,18 @@ class ControlPanel
     train_number = gets.chomp.to_i - 1
     if (0...self.trains.count).include?(train_number)
       train = self.trains[train_number] if train_number < self.trains.count
-      puts "Куда движется поезд? 1.Вперед, 2.Назад"
-      user_choise = gets.chomp.to_i
-      case user_choise
-        when 1 then train.move_forward
-        when 2 then train.move_backward
-        else puts "Такого варианта нет!" 
+      begin
+        puts "Куда движется поезд? 1.Вперед, 2.Назад, 3.Отмена"
+        user_choise = gets.chomp.to_i
+        case user_choise
+          when 1 then train.move_forward
+          when 2 then train.move_backward
+          when 3 then return
+          else puts "Такого варианта нет!" 
+        end
+      rescue Train::MovementError => e
+        puts e.message
+        retry
       end
     else 
       puts "Неправильно выбран поезд"
@@ -171,9 +195,14 @@ class ControlPanel
   end
 
   def create_station
-    puts "Введите название станции:"
-    station_name = gets.chomp
-    self.stations << Station.new(station_name)
+    begin
+      puts "Введите название станции:"
+      station_name = gets.chomp
+      self.stations << Station.new(station_name)
+    rescue Station::NameError, Station::UniquenessError => e
+      puts e
+      retry
+    end
   end
 
   def list_stations
@@ -249,7 +278,9 @@ class ControlPanel
       route.add_station(station)
     else
       puts "Неправильно выбран маршрут"
-    end 
+    end
+    rescue Route::AddStationError => e
+      puts e.message 
   end
 
   def route_delete_station
@@ -266,6 +297,8 @@ class ControlPanel
     else
       puts "Неправильно выбран маршрут"
     end 
+  rescue Route::DeleteStationError => e
+    puts e.message
   end
 
   def list_routes
