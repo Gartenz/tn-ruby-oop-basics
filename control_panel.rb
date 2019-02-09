@@ -8,6 +8,12 @@
 #      - Перемещать поезд по маршруту вперед и назад
 #      - Просматривать список станций и список поездов на станции
 
+# Если у вас есть интерфейс, то добавить возможности:
+#  +   При создании вагона указывать кол-во мест или общий объем, в зависимости от типа вагона
+#  +   Выводить список вагонов у поезда (в указанном выше формате), используя созданные методы
+#  +   Выводить список поездов на станции (в указанном выше формате), используя  созданные методы
+#  +   Занимать место или объем в вагоне
+
 require_relative 'cargo_train'
 require_relative 'cargo_wagon'
 require_relative 'passenger_train'
@@ -30,14 +36,14 @@ class ControlPanel
       puts "1.Управление поездами"
       puts "2.Управление станциями"
       puts "3.Управление маршрутами" if self.stations.count > 1
-      puts "4.Выход"
+      puts "0.Выход"
 
       user_choise = gets.chomp.to_i
       case user_choise
       when 1 then train_manage 
       when 2 then station_manage
       when 3 then route_manage
-      when 4 then break
+      when 0 then break
       else puts "Такого в меню нет!"
       end
     end
@@ -55,17 +61,19 @@ class ControlPanel
         puts "4.Добавить вагон к поезду"
         puts "5.Отцепить вагон от поезда"
         puts "6.Управлять движением поезда" if self.routes.any?
+        puts "7.Вывести список вагон у поезда"
       end
-      puts "7.Назад"
+      puts "0.Назад"
       user_choise = gets.chomp.to_i
       case user_choise
       when 1 then create_train
-      when 2 then list_trains
+      when 2 then list_all_trains
       when 3 then set_route
       when 4 then add_wagon
       when 5 then delete_wagon
       when 6 then train_move
-      when 7 then return
+      when 7 then train_list_wagons
+      when 0 then return
       else puts "Такого в меню нет!"
       end
     end
@@ -91,12 +99,14 @@ class ControlPanel
     puts "Создан поезд с номером: #{train_number} от компании: #{company_name}"
   end
 
-  def list_trains
-    self.trains.each.with_index(1) { |train, index| puts "#{index}. \"#{train.train_number}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}" }
+  def list_all_trains
+    self.trains.each.with_index(1) do |train, index|
+      puts "#{index}. \"#{train.number}\", тип: #{train.type.to_s}, вагоны: #{train.wagons.size}"
+    end
   end
 
   def add_wagon
-    list_trains
+    list_all_trains
     puts "К какому поезду хотите добавить вагон?"
     train_number = gets.chomp.to_i - 1 
     if (0...self.trains.count).include?(train_number)
@@ -107,8 +117,14 @@ class ControlPanel
         puts "Введите название компании:"
         company_name = gets.chomp
         case user_choise
-          when 1 then train.add_wagon(PassengerWagon.new(company_name))
-          when 2 then train.add_wagon(CargoWagon.new(company_name))
+          when 1 
+            puts "Введите количество мест в вагоне:"
+            space = gets.chomp.to_i
+            train.add_wagon(PassengerWagon.new(company_name, space))
+          when 2
+            puts "Введите грузовой объем(т.) вагона:"
+            space = gets.chomp.to_f 
+            train.add_wagon(CargoWagon.new(company_name, space))
           else puts "Такого варианта нет!"
         end
       rescue Train::WagonError, Wagon::CompanyNameError => e
@@ -119,12 +135,12 @@ class ControlPanel
   end
 
   def delete_wagon
-    list_trains
+    list_all_trains
     puts "От какого поезда хотите отцепить вагон?"
     train_number = gets.chomp.to_i - 1
     train = self.trains[train_number] if train_number < self.trains.count
     
-    puts "Количество вагонов у поезда \"#{train.train_number}\": #{train.wagons.size}"
+    puts "Количество вагонов у поезда \"#{train.number}\": #{train.wagons.size}"
     train.wagons.each_with_index { |wagon,index| puts "#{index}.#{wagon.company_name} тип: #{wagon.type}" }
 
     puts "Какой вагон хотите удалить?"
@@ -133,7 +149,7 @@ class ControlPanel
   end
 
   def set_route
-    list_trains
+    list_all_trains
     puts "К какому поезду хотите добавть маршрут:"
     user_choise = gets.chomp.to_i - 1
     if (0...self.trains.count).include?(user_choise)
@@ -149,18 +165,18 @@ class ControlPanel
   end
 
   def train_move
-    list_trains
+    list_all_trains
     puts "Какой поезд будет двигаться?"
     train_number = gets.chomp.to_i - 1
     if (0...self.trains.count).include?(train_number)
       train = self.trains[train_number] if train_number < self.trains.count
       begin
-        puts "Куда движется поезд? 1.Вперед, 2.Назад, 3.Отмена"
+        puts "Куда движется поезд? 1.Вперед, 2.Назад, 0.Отмена"
         user_choise = gets.chomp.to_i
         case user_choise
           when 1 then train.move_forward
           when 2 then train.move_backward
-          when 3 then return
+          when 0 then return
           else puts "Такого варианта нет!" 
         end
       rescue Train::MovementError => e
@@ -172,6 +188,20 @@ class ControlPanel
     end
   end
 
+  def train_list_wagons
+    list_all_trains
+    puts "У какого поезда хотите просмотреть список вагонов?"
+    train_choise = gets.chomp.to_i - 1
+    if (0..self.trains.count).include?(train_choise)
+      train = self.trains[train_choise]
+      puts "Поезд #{train.number} имеет кол-во вагоно #{train.wagons.count}:"
+      train.each_wagon do |wagon|
+        puts "Компания: #{wagon.company_name}, всего места: #{wagon.total_space}"\
+          " свободно: #{wagon.free_space} занято:#{wagon.occupied_space}"
+      end
+    end
+  end
+
   def station_manage
     loop do
       puts "Меню."
@@ -180,15 +210,17 @@ class ControlPanel
         puts "2.Удалить станцию"
         puts "3.Список станций"
         puts "4.Просмотреть поезда на станции"
+        puts "5.Добавить груз поезду" if self.trains.any?
       end
-      puts "5.Назад"
+      puts "0.Назад"
       user_choise = gets.chomp.to_i
       case user_choise
         when 1 then create_station
         when 2 then delete_station
         when 3 then list_stations
         when 4 then show_station_trains
-        when 5 then return
+        when 5 then add_train_space
+        when 0 then return
         else puts "Такого варианта нет!"
       end
     end
@@ -218,15 +250,61 @@ class ControlPanel
   end
 
   def show_station_trains
-    puts "На какой станции хотите просмотреть поезда:"
+    station = get_station
+    puts "На станции #{station.name} находятся:"
+    station.each_train_with_index(1) do |train, index|
+      puts "#{index}. \"#{train.number}\" тип: #{train.type} кол-во вагонов: #{train.wagons.count}"
+    end
+  rescue RangeError => e
+    puts e.message
+    retry
+  end
+
+  def add_train_space
+    station = get_station
+    puts "На станции #{station.name} находятся:"
+    station.each_train_with_index(1) do |train, index|
+      puts "#{index}. \"#{train.number}\" тип: #{train.type} кол-во вагонов: #{train.wagons.count}"
+    end
+    puts "Какому поезду вы хотите добавить груз?"
+    train_choise = gets.chomp.to_i - 1
+    if (0..station.trains.count).include?(train_choise)
+      train = station.trains[train_choise]
+      puts "В какой вагон вы хотите добавить груз?"
+      train.each_wagon_with_index(1) do |wagon, index|
+        puts "#{index}. тип: #{wagon.type} свободного места: #{wagon.free_space}"
+      end
+      wagon_choise = gets.chomp.to_i - 1
+      if (0..train.wagons.count).include?(wagon_choise)
+        wagon = train.wagons[wagon_choise]
+        begin
+          puts "Сколько груза вы хотите добавить?"
+          case wagon.type
+            when :passenger
+              people = gets.chomp.to_i
+              people.times { wagon.take_seat }
+            when :cargo
+              space = gets.chomp.to_f
+              wagon.add_cargo(space)
+          end
+        rescue Wagon::FreeSpaceError => e
+          puts e.message
+        end
+      end
+    end
+  rescue RangeError => e
+    puts e.message
+    retry
+  end
+
+  def get_station
+    puts "Выберите:"
     list_stations
     user_choise = gets.chomp.to_i - 1
     if (0...self.stations.count).include?(user_choise)
       station = self.stations[user_choise]
-      puts "На станции \"#{station.name}\" находятся:"
-      puts station.list_trains
     else
-      puts "Неправильно выбрана станция"
+      raise RangeError, "Неправильно выбрана станция"
     end
   end
 
@@ -239,14 +317,14 @@ class ControlPanel
         puts "3.Удалить станцию из маршрута"
         puts "4.Список маршрутов"
       end
-      puts "5.Назад"
+      puts "0.Назад"
       user_choise = gets.chomp.to_i
       case user_choise
         when 1 then create_route
         when 2 then route_add_station
         when 3 then route_delete_station
         when 4 then list_routes
-        when 5 then return
+        when 0 then return
         else puts "Такого варианта нет!"
       end
     end

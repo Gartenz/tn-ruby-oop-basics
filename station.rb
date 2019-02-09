@@ -4,6 +4,9 @@
 #  + Может возвращать список всех поездов на станции, находящиеся в текущий момент
 #  + Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских
 #  + Может отправлять поезда (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции).
+
+# написать метод, который принимает блок и проходит по всем поездам на станции, передавая каждый поезд в блок.
+
 require_relative 'instance_counter'
 
 class Station
@@ -52,7 +55,7 @@ class Station
   def list_trains
     return unless self.trains
     list = ""
-    self.trains.each { |train| list += "\"#{train.train_number}\" тип: #{train.type}" }
+    self.trains.each { |train| list += "\"#{train.number}\" тип: #{train.type} кол-во вагонов: #{train.wagons.count}" }
     list
   end
 
@@ -64,7 +67,22 @@ class Station
     types_count.each { |type, count| list "Поездов типа \"#{type}\": #{count}" }
     list
   end
+  
+  def each_train(&block)
+    if block_given?
+      self.trains.each { |train| yield train }
+    else
+      raise ArgumentError
+    end
+  end
 
+  def each_train_with_index(position, &block)
+    if block_given?
+      self.trains.each.with_index(position) { |train, index| yield train, index }
+    else
+      raise ArgumentError
+    end
+  end
   protected
 
   def validate!(name)

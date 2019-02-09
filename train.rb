@@ -12,6 +12,9 @@
 # + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад,
 #     но только на 1 станцию за раз.
 # + Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
+
+ # + Написать метод, который принимает блок и проходит по всем вагонам поезда 
+ #   (вагоны должны быть во внутреннем массиве), передавая каждый объект вагона в блок.
 require_relative 'company'
 require_relative 'instance_counter'
 
@@ -40,7 +43,7 @@ class Train
   end
 
   attr_accessor :speed
-  attr_reader :train_number, :type, :current_station, :next_station,
+  attr_reader :number, :type, :current_station, :next_station,
    :previous_station, :wagons, :route
 
   NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i
@@ -53,7 +56,7 @@ class Train
 
   def initialize(train_number, company_name, type = :unknown)
     @speed = 0
-    @train_number = train_number
+    @number = train_number
     @company_name = company_name
     @type = type
     @wagons = []
@@ -79,6 +82,22 @@ class Train
     @route = route
     @current_station = route.stations.first
     self.route.stations.first.train_arrive(self)
+  end
+
+  def each_wagon(&block)
+    if block_given?
+      self.wagons.each { |wagon| yield wagon }
+    else
+      raise ArgumentError
+    end
+  end
+
+  def each_wagon_with_index(position, &block)
+    if block_given?
+      self.wagons.each.with_index(position) { |wagon, index| yield wagon, index }
+    else
+      raise ArgumentError
+    end
   end
 
   def move_forward
@@ -108,7 +127,7 @@ class Train
   end
 
   def valid?
-    validate!(self.train_number, self.company_name)
+    validate!(self.number, self.company_name)
     true
   rescue NameError,CompanyNameError
     false
