@@ -85,19 +85,11 @@ class Train
   end
 
   def each_wagon(&block)
-    if block_given?
-      self.wagons.each { |wagon| yield wagon }
-    else
-      raise ArgumentError
-    end
+    self.wagons.each { |wagon| yield wagon }
   end
 
   def each_wagon_with_index(position, &block)
-    if block_given?
-      self.wagons.each.with_index(position) { |wagon, index| yield wagon, index }
-    else
-      raise ArgumentError
-    end
+    self.wagons.each.with_index(position) { |wagon, index| yield wagon, index }
   end
 
   def move_forward

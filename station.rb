@@ -69,19 +69,11 @@ class Station
   end
   
   def each_train(&block)
-    if block_given?
-      self.trains.each { |train| yield train }
-    else
-      raise ArgumentError
-    end
+    self.trains.each { |train| yield train }
   end
 
   def each_train_with_index(position, &block)
-    if block_given?
-      self.trains.each.with_index(position) { |train, index| yield train, index }
-    else
-      raise ArgumentError
-    end
+    self.trains.each.with_index(position) { |train, index| yield train, index }
   end
   protected
 

@@ -109,7 +109,7 @@ class ControlPanel
     list_all_trains
     puts "К какому поезду хотите добавить вагон?"
     train_number = gets.chomp.to_i - 1 
-    if (0...self.trains.count).include?(train_number)
+    if train_number <= self.trains.count
       train = self.trains[train_number]
       begin 
         puts "Какой вагон вы хотите добавить? 1.Пассажирский, 2.Грузовой"
@@ -152,12 +152,12 @@ class ControlPanel
     list_all_trains
     puts "К какому поезду хотите добавть маршрут:"
     user_choise = gets.chomp.to_i - 1
-    if (0...self.trains.count).include?(user_choise)
+    if user_choise <= self.trains.count
       train = self.trains[user_choise]
       list_routes
       puts "Какой маршрут хотите добавть:"
       user_choise = gets.chomp.to_i - 1
-      if (0...self.routes.count).include?(user_choise)
+      if user_choise <= self.routes.count
         train.route = self.routes[user_choise]
       end
     end
@@ -168,7 +168,7 @@ class ControlPanel
     list_all_trains
     puts "Какой поезд будет двигаться?"
     train_number = gets.chomp.to_i - 1
-    if (0...self.trains.count).include?(train_number)
+    if train_number <= self.trains.count
       train = self.trains[train_number] if train_number < self.trains.count
       begin
         puts "Куда движется поезд? 1.Вперед, 2.Назад, 0.Отмена"
@@ -192,7 +192,7 @@ class ControlPanel
     list_all_trains
     puts "У какого поезда хотите просмотреть список вагонов?"
     train_choise = gets.chomp.to_i - 1
-    if (0..self.trains.count).include?(train_choise)
+    if train_choise <= self.trains.count
       train = self.trains[train_choise]
       puts "Поезд #{train.number} имеет кол-во вагоно #{train.wagons.count}:"
       train.each_wagon do |wagon|
@@ -249,33 +249,31 @@ class ControlPanel
     self.stations.delete_at(user_choise)
   end
 
-  def show_station_trains
-    station = get_station
+  def list_station_trains(station)
     puts "На станции #{station.name} находятся:"
     station.each_train_with_index(1) do |train, index|
       puts "#{index}. \"#{train.number}\" тип: #{train.type} кол-во вагонов: #{train.wagons.count}"
     end
-  rescue RangeError => e
-    puts e.message
-    retry
+  end
+
+  def show_station_trains
+    station = get_station
+    list_station_trains(station)
   end
 
   def add_train_space
     station = get_station
-    puts "На станции #{station.name} находятся:"
-    station.each_train_with_index(1) do |train, index|
-      puts "#{index}. \"#{train.number}\" тип: #{train.type} кол-во вагонов: #{train.wagons.count}"
-    end
+    list_station_trains(station)
     puts "Какому поезду вы хотите добавить груз?"
     train_choise = gets.chomp.to_i - 1
-    if (0..station.trains.count).include?(train_choise)
+    if train_choise <= self.trains.count
       train = station.trains[train_choise]
       puts "В какой вагон вы хотите добавить груз?"
       train.each_wagon_with_index(1) do |wagon, index|
         puts "#{index}. тип: #{wagon.type} свободного места: #{wagon.free_space}"
       end
       wagon_choise = gets.chomp.to_i - 1
-      if (0..train.wagons.count).include?(wagon_choise)
+      if wagon_choise <= train.wagons.count
         wagon = train.wagons[wagon_choise]
         begin
           puts "Сколько груза вы хотите добавить?"
@@ -301,7 +299,7 @@ class ControlPanel
     puts "Выберите:"
     list_stations
     user_choise = gets.chomp.to_i - 1
-    if (0...self.stations.count).include?(user_choise)
+    if user_choise <= self.stations.count
       station = self.stations[user_choise]
     else
       raise RangeError, "Неправильно выбрана станция"
@@ -347,12 +345,12 @@ class ControlPanel
     list_routes
     puts "В какой маршрут вы хотите добавить станцию:"
     user_choise = gets.chomp.to_i - 1
-    if (0...self.routes.count).include?(user_choise)
+    if user_choise <= self.routes.count
       route = self.routes[user_choise]
       list_stations
       puts "какую станцию вы хотите добавить:"
       user_choise = gets.chomp.to_i - 1 
-      station = self.stations[user_choise] if (0...self.stations.count).include?(user_choise)
+      station = self.stations[user_choise] if user_choise <= self.stations.count
       route.add_station(station)
     else
       puts "Неправильно выбран маршрут"
@@ -365,12 +363,12 @@ class ControlPanel
     list_routes
     puts "Из какого маршрута вы хотите удалить станцию:"
     user_choise = gets.chomp.to_i - 1
-    if (0...self.routes.count).include?(user_choise)
+    if user_choise <= self.routes.count
       route = self.routes[user_choise]
       puts route.to_s
       puts "Какую станцию вы хотите удалить:"
       user_choise = gets.chomp.to_i - 1 
-      station = route.stations[user_choise] if (0...route.stations.count).include?(user_choise)
+      station = route.stations[user_choise] if user_choise <= route.stations.count
       route.delete_station(station)
     else
       puts "Неправильно выбран маршрут"
