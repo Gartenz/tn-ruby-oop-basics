@@ -1,3 +1,0 @@
-class RailroadExeception < Exception
-end
-

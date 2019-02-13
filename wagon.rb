@@ -5,7 +5,7 @@ class Wagon
 
   class FreeSpaceError < StandardError
     def message
-      "В вагоне больше нет свободного места."
+      'В вагоне больше нет свободного места.'
     end
   end
 
@@ -19,7 +19,7 @@ class Wagon
     validate_company_name!(company_name)
   end
 
-  protected 
-  
+  protected
+
   attr_writer :occupied_space, :free_space
 end

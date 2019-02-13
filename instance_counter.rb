@@ -3,7 +3,7 @@ module InstanceCounter
     base.extend(ClassMethods)
     base.send :include, InstanceMethods
   end
-  
+
   module ClassMethods
     attr_writer :instances
 
@@ -17,5 +17,4 @@ module InstanceCounter
       self.class.instances += 1
     end
   end
-
 end

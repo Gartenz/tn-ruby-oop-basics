@@ -1,9 +1,3 @@
-# Для пассажирских вагонов:
-# +    Добавить атрибут общего кол-ва мест (задается при создании вагона)
-# +    Добавить метод, который "занимает места" в вагоне (по одному за раз)
-# +    Добавить метод, который возвращает кол-во занятых мест в вагоне
-# +    Добавить метод, возвращающий кол-во свободных мест в вагоне.
-
 require_relative 'wagon'
 
 class PassengerWagon < Wagon
@@ -13,7 +7,8 @@ class PassengerWagon < Wagon
   end
 
   def take_seat
-    raise FreeSpaceError if self.free_space == 0
+    raise FreeSpaceError if free_space.zero?
+
     self.occupied_space += 1
     self.free_space -= 1
   end

@@ -1,20 +1,3 @@
-# Класс Train (Поезд):
-# + Имеет номер (произвольная строка) и тип (грузовой, пассажирский) и количество вагонов,
-#     эти данные указываются при создании экземпляра класса
-# + Может набирать скорость
-# + Может возвращать текущую скорость
-# + Может тормозить (сбрасывать скорость до нуля)
-# + Может возвращать количество вагонов
-# + Может прицеплять/отцеплять вагоны (по одному вагону за операцию, метод просто увеличивает или уменьшает количество вагонов). 
-#     Прицепка/отцепка вагонов может осуществляться только если поезд не движется.
-# + Может принимать маршрут следования (объект класса Route). 
-# + При назначении маршрута поезду, поезд автоматически помещается на первую станцию в маршруте.
-# + Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад,
-#     но только на 1 станцию за раз.
-# + Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
-
- # + Написать метод, который принимает блок и проходит по всем вагонам поезда 
- #   (вагоны должны быть во внутреннем массиве), передавая каждый объект вагона в блок.
 require_relative 'company'
 require_relative 'instance_counter'
 
@@ -24,29 +7,29 @@ class Train
 
   class NameError < StandardError
     def message
-      "Непраивльный формат номера поезда. Допустимый формат: "\
-      "три буквы или цифры в любом порядке, необязательный дефис "\
-      "и еще 2 буквы или цифры после дефиса."
+      'Непраивльный формат номера поезда. Допустимый формат: '\
+      'три буквы или цифры в любом порядке, необязательный дефис '\
+      'и еще 2 буквы или цифры после дефиса.'
     end
   end
 
   class WagonError < StandardError
     def message
-      "К поезду можно прикрепить вагон того же типа что и позед."
+      'К поезду можно прикрепить вагон того же типа что и позед.'
     end
   end
 
   class MovementError < StandardError
     def message
-      "Поезд находится на первой или последней станции."
+      'Поезд находится на первой или последней станции.'
     end
   end
 
   attr_accessor :speed
   attr_reader :number, :type, :current_station, :next_station,
-   :previous_station, :wagons, :route
+              :previous_station, :wagons, :route
 
-  NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i
+  NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i.freeze
 
   @@trains = {}
 
@@ -62,16 +45,16 @@ class Train
     @wagons = []
     @@trains[train_number] = self
     validate!(train_number, company_name)
-    self.register_instance
+    register_instance
   end
 
   def add_wagon(wagon)
     validate_wagon!(wagon)
-    self.wagons << wagon if stopped?
+    wagons << wagon if stopped?
   end
 
   def delete_wagon(number)
-    self.wagons.delete_at(number) if stopped? && self.wagons.any?
+    wagons.delete_at(number) if stopped? && wagons.any?
   end
 
   def stop
@@ -84,34 +67,36 @@ class Train
     self.route.stations.first.train_arrive(self)
   end
 
-  def each_wagon(&block)
-    self.wagons.each { |wagon| yield wagon }
+  def each_wagon
+    wagons.each { |wagon| yield wagon }
   end
 
-  def each_wagon_with_index(position, &block)
-    self.wagons.each.with_index(position) { |wagon, index| yield wagon, index }
+  def each_wagon_with_index(position)
+    wagons.each.with_index(position) { |wagon, index| yield wagon, index }
   end
 
   def move_forward
-    return unless has_route? 
-    raise MovementError if self.current_station == self.route.stations.last
+    return unless route?
+    raise MovementError if current_station == route.stations.last
+
     @previous_station = @current_station
-    self.current_station.train_depart(self)
+    current_station.train_depart(self)
     self.speed += 10
-    next_station_index = self.route.stations.index(self.current_station) + 1
-    @next_station = self.route.stations[next_station_index]
-    self.next_station.train_arrive(self)
+    next_station_index = route.stations.index(current_station) + 1
+    @next_station = route.stations[next_station_index]
+    next_station.train_arrive(self)
   end
 
   def move_backward
-    return unless has_route?
-    raise MovementError if self.current_station == self.route.stations.first
+    return unless route?
+    raise MovementError if current_station == route.stations.first
+
     @previous_station = @current_station
-    self.current_station.train_depart(self)
+    current_station.train_depart(self)
     self.speed += 10
-    next_station_index = self.route.index(self.current_station) - 1
-    @next_station = self.route.stations[next_station_index]
-    self.next_station.train_arrive(self)
+    next_station_index = route.index(current_station) - 1
+    @next_station = route.stations[next_station_index]
+    next_station.train_arrive(self)
   end
 
   def stopped?
@@ -119,9 +104,9 @@ class Train
   end
 
   def valid?
-    validate!(self.number, self.company_name)
+    validate!(number, company_name)
     true
-  rescue NameError,CompanyNameError
+  rescue NameError, CompanyNameError
     false
   end
 
@@ -129,17 +114,17 @@ class Train
 
   def validate!(train_number, company_name)
     raise NameError unless train_number =~ NUMBER_FORMAT
+
     validate_company_name!(company_name)
   end
 
   private
 
-  def has_route?
-    self.route != nil
+  def route?
+    route != nil
   end
 
   def validate_wagon!(wagon)
-    raise WagonError unless self.type == wagon.type
+    raise WagonError unless type == wagon.type
   end
-
 end

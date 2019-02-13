@@ -1,4 +1,4 @@
-require_relative "train.rb"
+require_relative 'train.rb'
 
 class PassengerTrain < Train
   def initialize(train_number, company_name)
