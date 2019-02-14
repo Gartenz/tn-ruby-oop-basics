@@ -155,7 +155,7 @@ class ControlPanel
     train_number = gets.chomp.to_i - 1
     return if train_number > trains.count
 
-    train = trains[train_number] if train_number < trains.count
+    train = trains[train_number]
     begin
       puts 'Куда движется поезд? 1.Вперед, 2.Назад, 0.Отмена'
       user_choise = gets.chomp.to_i
@@ -163,7 +163,6 @@ class ControlPanel
       when 1 then train.move_forward
       when 2 then train.move_backward
       when 0 then return
-      else puts 'Такого варианта нет!'
       end
     rescue Train::MovementError => e
       puts e.message
