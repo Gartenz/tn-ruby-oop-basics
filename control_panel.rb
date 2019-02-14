@@ -5,6 +5,7 @@ require_relative 'passenger_wagon'
 require_relative 'route'
 require_relative 'station'
 
+# rubocop:disable Metrics/ClassLength
 class ControlPanel
   attr_reader :trains, :routes, :stations
 
@@ -71,6 +72,7 @@ class ControlPanel
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def create_train
     begin
       puts 'Введите название поезда:'
@@ -89,6 +91,7 @@ class ControlPanel
     end
     puts "Создан поезд с номером: #{train_number} от компании: #{company_name}"
   end
+  # rubocop:enable Metrics/AbcSize
 
   def list_all_trains
     trains.each.with_index(1) do |train, index|
@@ -96,6 +99,7 @@ class ControlPanel
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def add_wagon
     list_all_trains
     puts 'К какому поезду хотите добавить вагон?'
@@ -121,6 +125,8 @@ class ControlPanel
     retry
   end
 
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize
   def delete_wagon
     list_all_trains
     puts 'От какого поезда хотите отцепить вагон?'
@@ -136,6 +142,8 @@ class ControlPanel
     train.delete_wagon(user_choise)
   end
 
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize
   def set_route
     list_all_trains
     puts 'К какому поезду хотите добавть маршрут:'
@@ -148,7 +156,9 @@ class ControlPanel
     user_choise = gets.chomp.to_i - 1
     train.route = routes[user_choise] if user_choise <= routes.count
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def train_move
     list_all_trains
     puts 'Какой поезд будет двигаться?'
@@ -169,7 +179,9 @@ class ControlPanel
       retry
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def train_list_wagons
     list_all_trains
     puts 'У какого поезда хотите просмотреть список вагонов?'
@@ -181,6 +193,7 @@ class ControlPanel
         " свободно: #{wagon.free_space}"
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def station_manage
     loop do
@@ -230,6 +243,7 @@ class ControlPanel
     list_station_trains(station)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def add_train_space
     station = select_station
     list_station_trains(station)
@@ -258,6 +272,7 @@ class ControlPanel
     puts e.message
     retry
   end
+  # rubocop:enable Metrics/AbcSize
 
   def select_station
     puts 'Выберите:'
@@ -283,6 +298,7 @@ class ControlPanel
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def create_route
     list_stations
     puts 'Выберите первую станцию:'
@@ -295,7 +311,9 @@ class ControlPanel
       puts 'Неправильные индексы станций'
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def route_add_station
     list_routes
     puts 'В какой маршрут вы хотите добавить станцию:'
@@ -313,7 +331,9 @@ class ControlPanel
   rescue Route::AddStationError => e
     puts e.message
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def route_delete_station
     list_routes
     puts 'Из какого маршрута вы хотите удалить станцию:'
@@ -330,6 +350,7 @@ class ControlPanel
   rescue Route::DeleteStationError => e
     puts e.message
   end
+  # rubocop:enable Metrics/AbcSize
 
   def list_routes
     puts 'Маршруты:'
@@ -344,6 +365,7 @@ class ControlPanel
       first != last
   end
 end
+# rubocop:enable Metrics/ClassLength
 
 m = ControlPanel.new
 m.run
