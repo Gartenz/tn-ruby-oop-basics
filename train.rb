@@ -29,7 +29,7 @@ class Train
   attr_reader :number, :type, :current_station, :wagons, :route
 
   NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i.freeze
-
+  # rubocop:disable Style/ClassVars
   @@trains = {}
 
   def self.find(train_number)
@@ -135,3 +135,5 @@ class Train
     raise WagonError unless type == wagon.type
   end
 end
+
+# rubocop:enable Style/ClassVars

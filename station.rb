@@ -17,6 +17,7 @@ class Station
 
   attr_reader :name, :trains
 
+  # rubocop:disable Style/ClassVars
   @@stations = {}
 
   STATION_NAME_FORMAT = /[а-я\w\d]*/.freeze
@@ -80,3 +81,5 @@ class Station
     raise UniquenessError if Station.find(name)
   end
 end
+
+# rubocop:enable Style/ClassVars
