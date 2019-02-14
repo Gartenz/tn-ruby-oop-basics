@@ -26,8 +26,7 @@ class Train
   end
 
   attr_accessor :speed
-  attr_reader :number, :type, :current_station, :next_station,
-              :previous_station, :wagons, :route
+  attr_reader :number, :type, :current_station, :wagons, :route
 
   NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i.freeze
 
@@ -75,15 +74,26 @@ class Train
     wagons.each.with_index(position) { |wagon, index| yield wagon, index }
   end
 
+  def next_station
+    raise MovementError if current_station == route.stations.last
+
+    next_station_index = route.stations.index(current_station) + 1
+    route.stations[next_station_index]
+  end
+
+  def previous_station
+    raise MovementError if current_station == route.stations.first
+
+    next_station_index = route.stations.index(current_station) - 1
+    route.stations[next_station_index]
+  end
+
   def move_forward
     return unless route?
     raise MovementError if current_station == route.stations.last
 
-    @previous_station = @current_station
     current_station.train_depart(self)
     self.speed += 10
-    next_station_index = route.stations.index(current_station) + 1
-    @next_station = route.stations[next_station_index]
     next_station.train_arrive(self)
   end
 
@@ -91,12 +101,9 @@ class Train
     return unless route?
     raise MovementError if current_station == route.stations.first
 
-    @previous_station = @current_station
     current_station.train_depart(self)
     self.speed += 10
-    next_station_index = route.index(current_station) - 1
-    @next_station = route.stations[next_station_index]
-    next_station.train_arrive(self)
+    previous_station.train_arrive(self)
   end
 
   def stopped?

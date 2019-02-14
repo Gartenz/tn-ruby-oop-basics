@@ -38,7 +38,7 @@ class Route
   def to_s
     route_map = ''
     stations.each do |station|
-      route_map += stations.last != station ? "#{station.name} -> " : station.name.to_s
+      route_map += stations.last != station ? "#{station.name} -> " : station.name
     end
     route_map
   end
