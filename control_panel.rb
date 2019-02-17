@@ -4,15 +4,25 @@ require_relative 'passenger_train'
 require_relative 'passenger_wagon'
 require_relative 'route'
 require_relative 'station'
+require_relative 'accessor'
+require_relative 'validate'
 
 # rubocop:disable Metrics/ClassLength
 class ControlPanel
-  attr_reader :trains, :routes, :stations
+  include Accessors
+  include Validation
+
+  strong_attr_accessor trains: Array, routes: Array, stations: Array
+
+  validate :trains, :presence
+  validate :routes, :presence
+  validate :stations, :presence
 
   def initialize
     @trains = []
     @routes = []
     @stations = []
+    valid?
   end
 
   def run

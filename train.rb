@@ -1,9 +1,13 @@
 require_relative 'company'
 require_relative 'instance_counter'
+require_relative 'accessor'
+require_relative 'validation'
 
 class Train
   include Company
   include InstanceCounter
+  include Accessors
+  include Validation
 
   class NameError < StandardError
     def message
@@ -25,10 +29,14 @@ class Train
     end
   end
 
-  attr_accessor :speed
-  attr_reader :number, :type, :current_station, :wagons, :route
+  strong_attr_accessor speed: Integer
+  attr_reader :type, :current_station, :wagons, :route
+  attr_accessor_with_history :number
 
-  NUMBER_FORMAT = /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i.freeze
+  validate :number, :presence
+  validate :number, :format, /[а-я\d\w]{3}\-?[а-я\d\w]{2}/i
+  validate :company_name, :presence
+
   # rubocop:disable Style/ClassVars
   @@trains = {}
 
@@ -43,7 +51,7 @@ class Train
     @type = type
     @wagons = []
     @@trains[train_number] = self
-    validate!(train_number, company_name)
+    valid?
     register_instance
   end
 
@@ -108,21 +116,6 @@ class Train
 
   def stopped?
     self.speed.zero?
-  end
-
-  def valid?
-    validate!(number, company_name)
-    true
-  rescue NameError, CompanyNameError
-    false
-  end
-
-  protected
-
-  def validate!(train_number, company_name)
-    raise NameError unless train_number =~ NUMBER_FORMAT
-
-    validate_company_name!(company_name)
   end
 
   private

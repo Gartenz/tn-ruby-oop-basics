@@ -1,4 +1,6 @@
 require_relative 'instance_counter'
+require_relative 'accsessor'
+require_relative 'validation'
 
 class Station
   include InstanceCounter
@@ -15,12 +17,13 @@ class Station
     end
   end
 
-  attr_reader :name, :trains
+  attr_reader :trains
+  strong_attr_accessor name: String
+
+  validate :name, :format, /[а-я\w\d]*/
 
   # rubocop:disable Style/ClassVars
   @@stations = {}
-
-  STATION_NAME_FORMAT = /[а-я\w\d]*/.freeze
 
   def self.all
     @@stations
@@ -31,10 +34,11 @@ class Station
   end
 
   def initialize(name)
-    validate!(name)
     @name = name
     @trains = []
     @@stations[name] = self
+    valid?
+    validate_uniqueness!(name)
   end
 
   def train_arrive(train)
@@ -76,8 +80,7 @@ class Station
 
   protected
 
-  def validate!(name)
-    raise NameError unless name =~ STATION_NAME_FORMAT
+  def validate_uniqueness!(name)
     raise UniquenessError if Station.find(name)
   end
 end

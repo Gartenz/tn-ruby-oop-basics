@@ -1,7 +1,9 @@
 require_relative 'instance_counter'
+require_relative 'accessor'
 
 class Route
   include InstanceCounter
+  include Accessors
 
   class AddStationError < StandardError
     def message
@@ -15,7 +17,7 @@ class Route
     end
   end
 
-  attr_reader :stations
+  strong_attr_accessor stations: Array
 
   def initialize(first_station, last_station)
     @stations = []
