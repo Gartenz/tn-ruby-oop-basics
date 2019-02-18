@@ -1,9 +1,11 @@
 require_relative 'instance_counter'
-require_relative 'accsessor'
+require_relative 'accessor'
 require_relative 'validation'
 
 class Station
   include InstanceCounter
+  include Accessors
+  include Validation
 
   class NameError < StandardError
     def message
@@ -37,7 +39,7 @@ class Station
     @name = name
     @trains = []
     @@stations[name] = self
-    valid?
+    validate!
     validate_uniqueness!(name)
   end
 

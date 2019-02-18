@@ -18,17 +18,17 @@ module Accessors
         end
 
         define_method("#{name}=") do |value|
-          if instance_variable_get(var_name).nil?
-            instance_variable_set(var_name_history, [])
-          else
+          if instance_variable_get(var_name)
             instance_variable_get(var_name_history).push(value)
+          else
+            instance_variable_set(var_name_history, [])
           end
           instance_variable_set(var_name, value)
         end
       end
     end
 
-    def strong_attr_accessor(names = {})
+    def strong_attr_accessor(**names)
       names.each do |name, class_type|
         var_name = "@#{name}".to_sym
         define_method(name) do

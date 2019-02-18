@@ -3,6 +3,7 @@ require_relative 'validation'
 
 class Wagon
   include Company
+  include Validation
 
   class FreeSpaceError < StandardError
     def message
@@ -19,7 +20,7 @@ class Wagon
     @type = type
     @total_space = @free_space = space
     @occupied_space = 0
-    valid?
+    validate!
   end
 
   protected

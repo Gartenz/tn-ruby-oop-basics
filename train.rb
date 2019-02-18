@@ -51,7 +51,7 @@ class Train
     @type = type
     @wagons = []
     @@trains[train_number] = self
-    valid?
+    validate!
     register_instance
   end
 

@@ -23,6 +23,8 @@ module Validation
   end
 
   module ClassMethods
+    attr_reader :validations
+
     def validate(name, type, params = nil)
       @validations ||= []
       @validations << { name: name, type: type, params: params }
@@ -38,30 +40,27 @@ module Validation
     end
 
     def validate!
-      self.class.validates.each do |validation|
-        case validation[:type]
-        when :presence then presence_validation(attr_name)
-        when :format then format_validation(validation[:name], validation[:param])
-        when :type then type_validation(validation[:name], validation[:param])
-        else
-          raise ArgumentError, "Ошибка в параметре 'type'"
-        end
+      return unless self.class.validations
+
+      self.class.validations.each do |validation|
+        name = instance_variable_get("@#{validation[:name]}".to_sym)
+        send "#{validation[:type]}_validation".to_sym, name, validation[:params]
       end
     end
 
     private
 
-    def presence_validation(name)
-      raise PresenceValidationError if ['', nil].include?(instance_variable_get(name))
+    def presence_validation(name, _params)
+      raise PresenceValidationError if ['', nil].include?(name)
     end
 
     def format_validation(name, format)
       raise RegexpError if format.class != Regexp
-      raise RegexpValidationError if instance_variable_get(name) !~ format
+      raise RegexpValidationError if name !~ format
     end
 
     def type_validation(name, type)
-      raise TypeValidationError if instance_variable_get(name).class != type
+      raise TypeValidationError if name.class != type
     end
   end
 end

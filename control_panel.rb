@@ -5,7 +5,7 @@ require_relative 'passenger_wagon'
 require_relative 'route'
 require_relative 'station'
 require_relative 'accessor'
-require_relative 'validate'
+require_relative 'validation'
 
 # rubocop:disable Metrics/ClassLength
 class ControlPanel
@@ -22,7 +22,7 @@ class ControlPanel
     @trains = []
     @routes = []
     @stations = []
-    valid?
+    validate!
   end
 
   def run
@@ -91,10 +91,11 @@ class ControlPanel
       company_name = gets.chomp
       puts 'Введите тип поезда: 1.Пассажирский, 2.Грузовой'
       user_choise = gets.chomp.to_i
-      trains << case user_choise
-                when 1 then PassengerTrain.new(train_number, company_name)
-                when 2 then CargoTrain.new(train_number, company_name)
-                end
+      train = case user_choise
+              when 1 then PassengerTrain.new(train_number, company_name)
+              when 2 then CargoTrain.new(train_number, company_name)
+              end
+      trains << train
     rescue Train::NameError, Train::CompanyNameError => e
       puts e.message
       retry
